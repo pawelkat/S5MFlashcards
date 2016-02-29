@@ -1,0 +1,1 @@
+curl -d @FILE.txt -H "Content-Type: application/json" -X POST http://localhost:5984/flashcards/_bulk_docs
