@@ -1,0 +1,8 @@
+/* Empty. Add your own CSS if you like */
+#container {
+				background-color: #FFFFFF;
+
+				height: 600px;
+				width: 100%;
+				border: 1px dashed black;
+			}
