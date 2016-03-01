@@ -63,7 +63,35 @@ angular.module('starter.controllers', [])
 })
 
 .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
+    var db = new PouchDB('flashcards');
   $scope.chat = Chats.get($stateParams.chatId);
+    var container = jQuery('#container2'),
+				idea = MAPJS.content(test_tree()),
+				imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
+				mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
+				container.domMapWidget(console, mapModel, false, imageInsertController);
+				jQuery('body').mapToolbarWidget(mapModel);
+				//jQuery('body').attachmentEditorWidget(mapModel);
+				$("[data-mm-action='export-image']").click(function () {
+					MAPJS.pngExport(idea).then(function (url) {
+						window.open(url, '_blank');
+					});
+				});
+               
+				jQuery('#linkEditWidget').linkEditWidget(mapModel);
+				window.mapModel = mapModel;
+				jQuery('.arrow').click(function () {
+					jQuery(this).toggleClass('active');
+				});
+				imageInsertController.addEventListener('imageInsertError', function (reason) {
+					console.log('image insert error', reason);
+				});
+                db.get($scope.chat.id).then(function (doc) {
+                    console.log(doc);
+                    idea = MAPJS.content(doc.flashcard.content);
+                    mapModel.setIdea(idea);
+                });
+             //   mapModel.setIdea(idea);
 })
 
 .controller('AccountCtrl', function($scope) {

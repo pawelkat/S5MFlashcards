@@ -3,12 +3,7 @@ angular.module('starter.services', [])
 .factory('Chats', function() {
   // Might use a resource here that returns a JSON array
     var db = new PouchDB('flashcards');
-    var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }];
+    var chats = [];
     db.allDocs({include_docs: true, descending: true}, function(err, doc) {
         doc.rows.forEach(function(todo) {
             if(todo.doc.hasOwnProperty("flashcard")){
