@@ -5,10 +5,16 @@
   The Friends service returns an array of friend data
 -->
 <ion-view view-title="{{chat.name}}">
-  <ion-content class="padding">
-    <img ng-src="{{chat.face}}" style="width: 64px; height: 64px">
+  <ion-content>
     <p>
       {{chat.lastText}}
     </p>
+
+    <ion-scroll zooming="true" direction="xy" style="width: 100%; height: 100%">
+        <div id="container2" style="overflow: auto; "></div>
+    </ion-scroll>
+    <input type="button" class="resetView" value="0"></input>
+	<input type="button" class="scaleUp" value="+"></input>
+	<input type="button" class="scaleDown" value="-"></input>
   </ion-content>
 </ion-view>
