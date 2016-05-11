@@ -39,12 +39,23 @@ angular.module('starter.controllers', [])
 			window.open(url, '_blank');
 		});
 	});
-    db.get('024f3c85-8aa6-4835-99ac-dfcb428c6bb1').then(function (doc) {
+	var currKey = null;
+	db.query('byDate/byDateIndex', {
+	    startkey: '1999',
+	    include_docs: true
+	  }).then(function (result) {
+	  console.log(result)
+	  currKey = result.rows[0].id;
+	  db.get(currKey).then(function (doc) {
     	currDoc = doc;
         console.log(doc);
         idea = MAPJS.content(doc.flashcard.content);
         mapModel.setIdea(idea);
-    });
+      });
+	}).catch(function (err) {
+	  console.log(err);
+	})
+
 
 	
 	jQuery('#linkEditWidget').linkEditWidget(mapModel);
@@ -76,7 +87,23 @@ angular.module('starter.controllers', [])
 
 .controller('ChatDetailCtrl', function($scope, $stateParams, flashcards) {
     var db = new PouchDB('flashcards');
-  $scope.chat = flashcards.get($stateParams.chatId);
+    var currFlashcard;
+  	$scope.chat = flashcards.get($stateParams.chatId);
+
+   	$scope.commit = function() {
+   		currFlashcard.flashcard.learnData={nextRev : new Date().toJSON()};
+    	//var date = Date();
+/*    	var dateIso = JSON.parse(JSON.stringify(new Date()));
+    	//currDoc.metadata.nextRevDate = "dups";
+    	var todo = {
+    _id: currDoc._id,
+    title: "text",
+    completed: false
+  };
+    	db.put(todo);*/
+    	db.put(currFlashcard);
+    	alert("jest");
+  	};
     var container = jQuery('#container2'),
 				idea = MAPJS.content(test_tree()),
 				imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
@@ -99,6 +126,7 @@ angular.module('starter.controllers', [])
 					console.log('image insert error', reason);
 				});
                 db.get($scope.chat.id).then(function (doc) {
+                	currFlashcard = JSON.parse(JSON.stringify(doc));
                     console.log(doc);
                     idea = MAPJS.content(doc.flashcard.content);
                     mapModel.setIdea(idea);
