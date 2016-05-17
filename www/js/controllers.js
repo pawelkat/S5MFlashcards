@@ -15,17 +15,49 @@ angular.module('starter.controllers', [])
     }).on('error', function (err) {
      // alert("replication error");
     });
-    $scope.calculateQuantity = function() {
-    	//var date = Date();
-    	var dateIso = JSON.parse(JSON.stringify(new Date()));
-    	//currDoc.metadata.nextRevDate = "dups";
-    	var todo = {
-    _id: currDoc._id,
-    title: "text",
-    completed: false
-  };
-    	db.put(todo);
+
+    $scope.noCardsToRepeat = 0;
+
+    // the function to be called from UI, to grade the flashcard
+    $scope.grade = function(grade) {
+    	var currDate = new Date();
+    	//TODO: implement according to the algorithm here, display the next repetition day in UI, then push the calculated grade here,
+    	//TODO: push all the repetiotion grades to the array
+    	//TODO: create the info page with learning data in UI
+    	currDate.setMinutes(currDate.getMinutes() + grade);
+    	currDoc.flashcard.learnData={nextRev : currDate.toJSON(), prevRev : new Date().toJSON()};
+    	db.put(currDoc).then(function (doc) {
+	    	//displaying the next flashcard
+	    	$scope.showNextToRepeat();    		
+    	});
+
   	};
+
+  	$scope.showNextToRepeat = function() {
+  		var currKey = null;
+		db.query('byDate/byDateIndex', {
+		    endkey: new Date().toJSON(),
+		    include_docs: true
+		  }).then(function (result) {
+		  	console.log(result);
+		  	$scope.noCardsToRepeat = result.rows.length;
+		  	$scope.$apply();
+		  	if (result.rows.length > 0 ) {
+			  	currKey = result.rows[0].id;
+			  	currDoc = result.rows[0].doc;
+			  	//taking the document from db, to have a copy (the copy will be used to create idea)
+			  	db.get(currKey).then(function (doc) {
+
+		        	idea = MAPJS.content(doc.flashcard.content);
+		        	mapModel.setIdea(idea);
+		      	});
+			}
+		}).catch(function (err) {
+		  console.log(err);
+		});
+		
+  	};
+
 	window.onerror = alert;
 	var container = jQuery('#container'),
 	idea = MAPJS.content(test_tree()),
@@ -39,23 +71,8 @@ angular.module('starter.controllers', [])
 			window.open(url, '_blank');
 		});
 	});
-	var currKey = null;
-	db.query('byDate/byDateIndex', {
-	    startkey: '1999',
-	    include_docs: true
-	  }).then(function (result) {
-	  console.log(result)
-	  currKey = result.rows[0].id;
-	  db.get(currKey).then(function (doc) {
-    	currDoc = doc;
-        console.log(doc);
-        idea = MAPJS.content(doc.flashcard.content);
-        mapModel.setIdea(idea);
-      });
-	}).catch(function (err) {
-	  console.log(err);
-	})
 
+	$scope.showNextToRepeat();
 
 	
 	jQuery('#linkEditWidget').linkEditWidget(mapModel);
@@ -89,20 +106,10 @@ angular.module('starter.controllers', [])
     var db = new PouchDB('flashcards');
     var currFlashcard;
   	$scope.chat = flashcards.get($stateParams.chatId);
-
+  	//commit function. Adding the next revision as a current Date()
    	$scope.commit = function() {
    		currFlashcard.flashcard.learnData={nextRev : new Date().toJSON()};
-    	//var date = Date();
-/*    	var dateIso = JSON.parse(JSON.stringify(new Date()));
-    	//currDoc.metadata.nextRevDate = "dups";
-    	var todo = {
-    _id: currDoc._id,
-    title: "text",
-    completed: false
-  };
-    	db.put(todo);*/
     	db.put(currFlashcard);
-    	alert("jest");
   	};
     var container = jQuery('#container2'),
 				idea = MAPJS.content(test_tree()),

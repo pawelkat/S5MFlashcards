@@ -45,28 +45,31 @@
         </div>
         <div class="row">
             <div class="col">
-                <button ng-click="calculateQuantity()" class="button button-circle button-energized icon ion-sad"></button>
+                <button ng-click="grade(1)" class="button button-circle button-energized icon ion-sad"></button>
             </div>
             <div class="col">
-                <button class="button button-circle button-energized icon ion-sad-outline"></button>
+                <button ng-click="grade(2)" class="button button-circle button-energized icon ion-sad-outline"></button>
             </div>
             <div class="col">
-                <button class="button button-circle button-energized icon ion-sad"></button>
+                <button ng-click="grade(3)" class="button button-circle button-energized icon ion-sad"></button>
             </div>
             <div class="col">
-                <button class="button button-circle button-energized icon ion-happy"></button>
+                <button ng-click="grade(4)" class="button button-circle button-energized icon ion-happy"></button>
             </div>
             <div class="col">
-                <button class="button button-circle button-positive icon ion-happy"></button>
+                <button ng-click="grade(5)" class="button button-circle button-positive icon ion-happy"></button>
             </div>
-        </div>       
+        </div> 
+                    <p class="row">Cards to repeat: {{noCardsToRepeat}}</p>          
     </div>
   </ion-content>
     <div class="fixed-outside">
+
         <div>
             <input type="button" class="resetView icon ion-sad" value="0"></input>
             <input type="button" class="scaleUp" value="+"></input>
             <input type="button" class="scaleDown" value="-"></input>
+
         </div>
         <div class="row">
             <div class="col">
@@ -84,6 +87,8 @@
             <div class="col">
                 <button class="button button-circle button-positive icon ion-happy"></button>
             </div>
-        </div>       
+        </div>   
+
     </div>
+
 </ion-view>
