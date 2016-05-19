@@ -1,6 +1,6 @@
 <ion-view view-title="Learn">
 
-  <ion-content class="padding" style="width: 100%; height: 100%">
+  <!-- <ion-content style="width: 100%; height: 600px"> -->
 
 <!--		<input type="button" class="addSubIdea" value="add"></input>
 		<input type="button" class="editNode" value="edit"></input>
@@ -20,75 +20,33 @@
 		Background: <input type="text" class='updateStyle' data-mm-target-property='background'></input>
     Frames: <span id="framerate"></span>
     Cycle: <span id="cyclerate"></span>
-		<div id="linkEditWidget">
-			<input class="delete" type="button" value="Delete"></input>
-			<select class="color">
-				<option value="red">Red</option>
-				<option value="blue">Blue</option>
-			</select>
-			<select class="lineStyle">
-				<option value="solid">Solid</option>
-				<option value="dashed">Dashed</option>
-			</select>
-			<button class="arrow">Arrow</button>
-		</div>-->
-    <div style="width: 100%; height: 100%">
-        <ion-scroll zooming="true" direction="xy" style="width: 100%; height: 100%">
-            <div id="container" style="overflow: auto; "></div>
-        </ion-scroll>
-    </div>
-    <div class="fixed-outside">
+    <!-- <div style="width: 100%; height: 100%"> -->
+        
+            <!-- <div id="container" style="overflow: auto; "></div> -->
+    <!-- </div> -->
+   
+  <!-- </ion-content> -->
+    <ion-content>
+
+      <div id="container"></div>
+
+    </ion-content>
+    <div style="position: absolute; bottom: 0px; width: 100%; height: 100px">
         <div>
-            <input type="button" class="resetView icon ion-sad" value="0"></input>
-            <input type="button" class="scaleUp" value="+"></input>
-            <input type="button" class="scaleDown" value="-"></input>
+            <a class="resetView button button-icon icon ion-android-radio-button-off"></a>
+            <a class="scaleUp button button-icon icon ion-android-add-circle"></a>
+            <a class="scaleDown button button-icon icon ion-android-remove-circle"></a>
         </div>
-        <div class="row">
-            <div class="col">
-                <button ng-click="grade(1)" class="button button-circle button-energized icon ion-sad"></button>
-            </div>
-            <div class="col">
-                <button ng-click="grade(2)" class="button button-circle button-energized icon ion-sad-outline"></button>
-            </div>
-            <div class="col">
-                <button ng-click="grade(3)" class="button button-circle button-energized icon ion-sad"></button>
-            </div>
-            <div class="col">
-                <button ng-click="grade(4)" class="button button-circle button-energized icon ion-happy"></button>
-            </div>
-            <div class="col">
-                <button ng-click="grade(5)" class="button button-circle button-positive icon ion-happy"></button>
-            </div>
-        </div> 
-                    <p class="row">Cards to repeat: {{noCardsToRepeat}}</p>          
-    </div>
-  </ion-content>
-    <div class="fixed-outside">
 
-        <div>
-            <input type="button" class="resetView icon ion-sad" value="0"></input>
-            <input type="button" class="scaleUp" value="+"></input>
-            <input type="button" class="scaleDown" value="-"></input>
-
+        <div class="button-bar">
+            <button ng-click="grade(1)" class="button button-circle button-assertive icon ion-sad"><span class="badge badge-balanced">{{grades[1]}}</span></button>
+            <button ng-click="grade(2)" class="button button-circle button-assertive icon ion-sad"><span class="badge badge-balanced">{{grades[2]}}</span></button>
+            <button ng-click="grade(3)" class="button button-circle button-energized icon ion-sad"><span class="badge badge-balanced">{{grades[3]}}</span></button>
+            <button ng-click="grade(4)" class="button button-circle button-energized icon ion-happy"><span class="badge badge-balanced">{{grades[4]}}</span></button>
+            <button ng-click="grade(5)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[5]}}</span></button>
+            <button ng-click="grade(6)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[6]}}</span></button>
         </div>
-        <div class="row">
-            <div class="col">
-                <button class="button button-circle button-energized icon ion-sad"></button>
-            </div>
-            <div class="col">
-                <button class="button button-circle button-energized icon ion-sad-outline"></button>
-            </div>
-            <div class="col">
-                <button class="button button-circle button-energized icon ion-sad"></button>
-            </div>
-            <div class="col">
-                <button class="button button-circle button-energized icon ion-happy"></button>
-            </div>
-            <div class="col">
-                <button class="button button-circle button-positive icon ion-happy"></button>
-            </div>
-        </div>   
-
+        <p class="row">Cards to repeat: {{noCardsToRepeat}}</p>          
     </div>
 
 </ion-view>

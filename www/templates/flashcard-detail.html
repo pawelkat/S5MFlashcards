@@ -1,0 +1,52 @@
+<!--
+  This template loads for the 'tab.friend-detail' state (app.js)
+  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
+  The FriendsCtrl pulls data from the Friends service (service.js)
+  The Friends service returns an array of friend data
+-->
+<ion-view view-title="{{flashcard.name}}">
+
+  <ion-content  class="padding" style="width: 100%; height: 600px">
+
+    <div style="width: 100%; height: 1000px">
+      <div id="container2" style="overflow: auto; width: 100%; height: 600px"></div>    
+    </div>
+
+  </ion-content>
+  <div style="position: absolute; bottom: 0px; width: 100%">
+      <div>
+          <a class="resetView button button-icon icon ion-android-radio-button-off"></a>
+          <a class="scaleUp button button-icon icon ion-android-add-circle"></a>
+          <a class="scaleDown button button-icon icon ion-android-remove-circle"></a>
+          <a class="addSubIdea button button-icon icon ion-fork-repo"></a>
+          <a class="removeSubIdea button button-icon icon ion-ios-close-outline"></a>
+          <a class="undo button button-icon icon ion-reply"></a>
+          <a class="redo button button-icon icon ion-forward"></a>
+          <a class="insertIntermediate button button-icon icon ion-merge"></a>
+        <!--   <input type="button" class="addSubIdea" value="add"></input>
+    <input type="button" class="editNode" value="edit"></input>
+    <input type="button" class="removeSubIdea" value="delete"></input>
+    <input type="button" class="insertIntermediate" value="insert parent"></input>
+    <input type="button" class="toggleCollapse" value="exp/col"></input>
+    <input type="button" onclick="mapModel.setInputEnabled(false)" value="disable"></input>
+    <input type="button" onclick="mapModel.setInputEnabled(true)" value="enable"></input>
+    <input type="button" class="undo" value="undo"></input>
+    <input type="button" class="redo" value="redo"></input>
+    <input type="button" data-mm-action="export-image" value="Export To Image"/>
+    <input type="button" class="cut" value="cut"></input>
+    <input type="button" class="copy" value="copy"></input>
+    <input type="button" class="paste" value="paste"></input> -->
+      </div>
+      <div>
+         <button ng-click="commit()" class="button button-circle button-energized">commit</button>
+         <button ng-click="commit()" class="button button-circle button-energized">save</button>
+      </div>
+    <label class="item item-input item-select">
+      <div class="input-label">category</div>
+      <!-- <input type="text" ng-model="flashcard.category"/> -->
+      <select ng-model="flashcard.category">
+        <option ng-repeat="cat in categories" ng-value="{{cat.desc}}">{{cat.desc}}</option>
+      </select>
+    </label>
+  </div>
+</ion-view>

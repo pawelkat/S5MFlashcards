@@ -20,7 +20,7 @@ $(document).ready(function(){
     byDateIndex: {
       map: function mapFun(doc) {
         if (doc.flashcard.learnData) {
-          emit(doc.flashcard.learnData.nextRev);
+          emit(doc.flashcard.learnData.nextDate);
         }
       }.toString()
     }
@@ -43,7 +43,7 @@ db.put(ddoc).catch(function (err) {
   console.log(result)
 }).catch(function (err) {
   console.log(err);
-});*/
+});
 db.query('byDate/byDateIndex', {
     startkey: '2000',
     include_docs: true
@@ -51,8 +51,31 @@ db.query('byDate/byDateIndex', {
   console.log(result)
 }).catch(function (err) {
   console.log(err);
-})
+})*/
+var db = new PouchDB('flashcards');
 
+    var ddoc = {
+        _id: '_design/categ',
+        views: {
+          "aa": { 
+            map: function (doc) { 
+              if(doc.flashcard.hasOwnProperty("category")){emit([doc.flashcard.category])}; }.toString(), 
+            reduce: "_count"
+          }
+        }
+    };
+    
+
+return db.put(ddoc).catch(function (err) {
+  if (err.status !== 409) { // 409 is conflict
+    throw err;
+  }
+}).then(function () {
+  return db.query('categ/aa', {
+    reduce: true,
+    group: true
+  }).then(function (result) {console.log(result);})
+});
     // document that tells PouchDB/CouchDB
 // to build up an index on doc.name
 /*var ddoc = {

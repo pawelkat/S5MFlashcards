@@ -5,15 +5,22 @@ angular.module('starter.services', [])
     var db = new PouchDB('flashcards');
     var flashcards = [];
     db.allDocs({include_docs: true, descending: true}, function(err, doc) {
-        doc.rows.forEach(function(todo) {
-            if(todo.doc.hasOwnProperty("flashcard")){
-             var chat = {
-                id: todo.doc._id,
-                name: todo.doc.flashcard.content.title,
-                lastText: 'You on your way?',
-                face: 'img/ben.png'
+        getText = function(content){
+            var aa = "...";
+          //for (var i = 0; i < content.ideas.length; i++) {
+            _.each(content.ideas, function (value, key){
+              aa = aa + value.title + "...";
+            });
+            return aa;
+        };
+        doc.rows.forEach(function(row) {
+            if(row.doc.hasOwnProperty("flashcard")){
+             var flashcard = {
+                id: row.doc._id,
+                name: row.doc.flashcard.content.title,
+                lastText: getText(row.doc.flashcard.content)
               };
-            flashcards.push(chat);
+            flashcards.push(flashcard);
             }
         });
     });

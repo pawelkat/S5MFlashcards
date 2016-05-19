@@ -59,12 +59,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         }
       }
     })
-    .state('tab.chat-detail', {
-      url: '/flashcards/:chatId',
+    .state('tab.flashcard-detail', {
+      url: '/flashcards/:flashcardId',
       views: {
         'tab-flashcards': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
+          templateUrl: 'templates/flashcard-detail.html',
+          controller: 'flashcardDetailCtrl'
         }
       }
     })
