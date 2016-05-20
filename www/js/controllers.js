@@ -6,16 +6,10 @@ angular.module('starter.controllers', [])
 	//});
 
 	var db = new PouchDB('flashcards');
-    var remoteDB = new PouchDB('http://192.168.16.195:5984/flashcards')
-  //  $scope.chat = flashcards.nextToLearn();
-  	var currDoc = null;
+    var currDoc = null;
 	db.info().then(function (info) {
 		console.log(info);
 	});
-    db.replicate.from(remoteDB).on('complete', function () {
-    }).on('error', function (err) {
-     // alert("replication error");
-    });
 
     $scope.noCardsToRepeat = 0;
 
@@ -221,27 +215,116 @@ angular.module('starter.controllers', [])
              //   mapModel.setIdea(idea);
 })
 
-.controller('AccountCtrl', function($scope) {
-	var db = new PouchDB('flashcards');
-	var ddoc = {
-	  _id: '_design/byDate',
-	  views: {
-	    byDateIndex: {
-	      map: function mapFun(doc) {
-	        if (doc.flashcard.learnData) {
-	          emit(doc.flashcard.learnData.nextDate);
-	        }
-	      }.toString()
-	    }
-	  }
+.controller('AccountCtrl', function($scope, $ionicPopup) {
+	//default settings
+	$scope.settings = {
+		remoteDB: "http://192.168.16.195:5984/flashcards"
 	}
 
-	// save the design doc
-	db.put(ddoc).then(function (doc) {
-	    	//displaying the next flashcard
-	    	alert("view updated")    		
-    	});
-	$scope.settings = {
-	    enableFriends: true
-	};
+	var db = new PouchDB('flashcards');
+	var settingsDoc;
+	//Initializing settings from DB
+	db.get("settingsDoc").then(function (doc) {
+		settingsDoc = doc;
+    	$scope.settings = doc.settings;
+    	$scope.$apply();
+    }).catch(function (err) {
+		settingsDoc = {
+			_id: "settingsDoc",
+			settings: $scope.settings
+		}
+      	$scope.settingsSave();
+	});
+
+	$scope.settingsSave = function() {
+		settingsDoc.settings = $scope.settings;
+		db.put(settingsDoc).then(function (doc) {
+			settingsDoc = doc;
+		    console.log("settings saved");  		
+	    });
+	}
+
+	$scope.reindex = function() {
+		var ddoc = {
+		  _id: '_design/byDate',
+		  views: {
+		    byDateIndex: {
+		      map: function mapFun(doc) {
+		        if (doc.flashcard.learnData) {
+		          emit(doc.flashcard.learnData.nextDate);
+		        }
+		      }.toString()
+		    }
+		  }
+		}
+
+		// save the design doc
+		db.put(ddoc).then(function (doc) {
+		    alert("view byDate updated")    		
+	    });
+
+	    ddoc = {
+	        _id: '_design/categ',
+	        views: {
+		          "aa": { 
+		            map: function (doc) { 
+		              if(doc.flashcard.hasOwnProperty("category")){emit([doc.flashcard.category])}; }.toString(), 
+		            reduce: "_count"
+		          }
+	        }
+	    };
+    
+
+		db.put(ddoc).catch(function (err) {
+		  if (err.status !== 409) { // 409 is conflict
+		    throw err;
+		  }
+		}).then(function () {
+		  return db.query('categ/aa', {
+		    reduce: true,
+		    group: true
+		  }).then(function (result) {console.log(result);})
+		});
+	}
+
+	$scope.replicateFrom = function() {
+    	var remoteDB = new PouchDB($scope.settings.remoteDB); 	
+	    db.replicate.from(remoteDB).on('complete', function () {
+	    	alert("replication complete");
+	    }).on('error', function (err) {
+	      alert("replication error");
+	    });
+  	};
+
+  	$scope.replicateTo = function() {
+    	var remoteDB = new PouchDB($scope.settings.remoteDB); 	
+	    db.replicate.to(remoteDB).on('complete', function () {
+	    	alert("replication complete");
+	    }).on('error', function (err) {
+	      alert("replication error");
+	    });
+  	};
+  	$scope.clearDatabase = function() {
+
+	   	var confirmPopup = $ionicPopup.confirm({
+	     	title: 'Consume Ice Cream',
+	     	template: 'Are you sure you want to eat this ice cream?'
+	   	});
+
+   		confirmPopup.then(function(res) {
+	     	if(res) {
+	       		db.destroy().then(function (response) {
+			  // success
+			}).catch(function (err) {
+			  console.log(err);
+			});
+     		} else {
+       			console.log('You are not sure');
+     		}
+  		});
+ 	};
+		
+
+
+  	
 });

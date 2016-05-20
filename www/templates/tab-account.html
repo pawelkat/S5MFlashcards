@@ -1,9 +1,19 @@
-<ion-view view-title="Account">
+<ion-view view-title="Settings">
   <ion-content>
+  <div class="list">
+	  <label class="item item-input">
+	    <span class="input-label">remote DB URL</span>
+	    <input type="text" name="remoteDB" ng-model="settings.remoteDB"></input>
+	  </label>
+	</div>
     <ion-list>
-    <ion-toggle  ng-model="settings.enableFriends">
-        Enable Friends
-    </ion-toggle>
+        <a ng-click="reindex()" class="removeSubIdea button button-icon icon ion-loop">reindex</a>
+        <a ng-click="replicateFrom()" class="undo button button-icon icon ion-reply">replicateFrom</a>
+        <a ng-click="replicateTo()" class="redo button button-icon icon ion-forward">replicateTo</a>
+        <a ng-click="clearDatabase()" class="redo button button-icon icon ion-ios-close-outline">clear Database</a>
     </ion-list>
+    <div>
+    	<button ng-click="settingsSave()" class="button button-circle button-assertive">Save settings</button>
+    </div>
   </ion-content>
 </ion-view>
