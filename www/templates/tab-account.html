@@ -15,5 +15,8 @@
     <div>
     	<button ng-click="settingsSave()" class="button button-circle button-assertive">Save settings</button>
     </div>
+    <select ng-model="settings.mainCategory">
+        <option ng-repeat="cat in categories" ng-value="{{cat.desc}}">{{cat.desc}}</option>
+    </select>
   </ion-content>
 </ion-view>

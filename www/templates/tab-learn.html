@@ -1,5 +1,5 @@
-<ion-view view-title="Learn">
-
+<ion-view view-title="Learn {{categories}} ({{noCardsToRepeat}})">
+    
   <!-- <ion-content style="width: 100%; height: 600px"> -->
 
 <!--		<input type="button" class="addSubIdea" value="add"></input>
@@ -27,7 +27,7 @@
    
   <!-- </ion-content> -->
     <ion-content>
-
+        <!--<p class="row">Cards to repeat: {{noCardsToRepeat}}</p> --> 
       <div id="container"></div>
 
     </ion-content>
@@ -36,6 +36,7 @@
             <a class="resetView button button-icon icon ion-android-radio-button-off"></a>
             <a class="scaleUp button button-icon icon ion-android-add-circle"></a>
             <a class="scaleDown button button-icon icon ion-android-remove-circle"></a>
+            <button ng-click="showInfo()" class="button button-icon icon ion-android-radio-button-off">
         </div>
 
         <div class="button-bar">
@@ -46,7 +47,7 @@
             <button ng-click="grade(5)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[5]}}</span></button>
             <button ng-click="grade(6)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[6]}}</span></button>
         </div>
-        <p class="row">Cards to repeat: {{noCardsToRepeat}}</p>          
+          
     </div>
 
 </ion-view>
