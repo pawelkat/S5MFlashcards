@@ -27,7 +27,7 @@ angular.module('starter.services', [])
       });
     },
 
-    getByCategories: function(categories){
+  /*  getByCategories: function(categories){
       return db.allDocs({
         include_docs: true
       }).then(function (result) {
@@ -62,28 +62,56 @@ angular.module('starter.services', [])
       }).catch(function (err) {
         console.log(err);
       });
-    },
+    }, */
     //returns the next item to learn by category
+    getByCategories: function(categories){
+      return db.query('byDateAndCat/categoryItemsWithHeader', {
+        startkey: [categories, ''],
+        endkey: [categories,'\uffff'],
+        include_docs: false
+      }).then(function (result) { 
+          return result.rows.map(
+              function(row){
+                return {
+                  id: row.id,
+                  name: row.value.title,
+                  lastText: row.value.header
+                };
+              }
+            );
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
     nextToLearn: function(categories){
-      return db.query('byDate/byDateIndex', {
-        endkey: new Date().toJSON(),
-        limit: 10,
+      return db.query('byDateAndCat/commitedItems', {
+        startkey: [categories, ''],
+        endkey: [categories,new Date().toJSON()],
+        limit: 1,
         include_docs: true
       }).then(function (result) {
-        if (result.rows.length > 0 ) {
-          var matchedWithCategory = result.rows
-            .filter(
-              function(row){
-                return row.doc.flashcard.category[0]===categories;
-              }
-            )
-
+        if (result.rows.length > 0 ) {   
           return {
-            key: matchedWithCategory[0].id,
-            doc: matchedWithCategory[0].doc,
-            itemsRemaining: matchedWithCategory.length
+            key: result.rows[0].id,
+            doc: result.rows[0].doc
+          }
+        }else{
+          return {
+            key: 'noCardsLeft',
+            doc: {flashcard:{content:{id:1,title:"no Cards toLearn"}}}
           }
         }
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
+    numberCardsToRepeat: function(categories){
+      return db.query('byDateAndCat/commitedItems', {
+        startkey: [categories, ''],
+        endkey: [categories,new Date().toJSON()],
+        include_docs: false
+      }).then(function (result) {
+        return result.rows.length;
       }).catch(function (err) {
         console.log(err);
       });
@@ -115,12 +143,26 @@ angular.module('starter.services', [])
       })
       .then(function(){
         designDoc.views = {
-          English: {
+          commitedItems: {
             map: function mapFun(doc) {
-              if (doc.flashcard.learnData) {
-                emit(doc.flashcard.learnData.nextDate, doc.flashcard.category);
+              if (doc.flashcard.hasOwnProperty("category") && doc.flashcard.learnData && doc.flashcard.learnData.hasOwnProperty("nextDate")) {
+                emit([doc.flashcard.category[0], doc.flashcard.learnData.nextDate]);
               }
-            }.toString()
+            }.toString() //,
+            //reduce: "_count"
+          },
+          categoryItemsWithHeader: {
+            map: function mapFun(doc) {
+              if (doc.flashcard.hasOwnProperty("category")) {
+                var title = doc.flashcard.content.title.trim();
+                var header = '...';
+                _.each(doc.flashcard.content.ideas, function (value, key){
+                  header = header + value.title + "...";
+                });
+                emit([doc.flashcard.category[0], title], {title: title, header: header, commited: doc.flashcard.hasOwnProperty("learnData")});
+              }
+            }.toString() //,
+            //reduce: "_count"
           }
         };
         db.put(designDoc).then(function (doc) {

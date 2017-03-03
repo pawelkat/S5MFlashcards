@@ -101,7 +101,7 @@ angular.module('starter.controllers', [])
 
 	  	$scope.showNextToRepeat = function() {
 	  		flashcards.nextToLearn($scope.categories).then(function (result) {
-	  			$scope.noCardsToRepeat = result.itemsRemaining;
+	  			//$scope.noCardsToRepeat = result.itemsRemaining;
 	  			console.log(result);
 	  			currDoc=result.doc;
 	  			db.get(result.key).then(function (doc) {
@@ -112,9 +112,18 @@ angular.module('starter.controllers', [])
 	        		mapModel.scaleDown();
 	        		$scope.$apply();
 				});
+				//calculating how many cards left to learn in category
+				$scope.numberCardsToRepeat();
+
 	  		});			
 	  	};
 
+	  	$scope.numberCardsToRepeat = function(){
+	  		flashcards.numberCardsToRepeat($scope.categories).then(function(result){
+	  			$scope.noCardsToRepeat=result;
+	  			$scope.$apply();
+	  		});
+	  	};
 		window.onerror = alert;
 		var container = jQuery('#container'),
 		idea = MAPJS.content(test_tree()),
@@ -160,8 +169,9 @@ angular.module('starter.controllers', [])
 		console.log(confDoc);
 		$scope.categories=confDoc.settings.mainCategory;
 		flashcards.getByCategories($scope.categories).then(function(result){
-			$scope.flashcards=result.items;
-			$scope.itemsCnt=result.itemsCnt;
+			$scope.flashcards=result;
+			$scope.itemsCnt=result.length;
+			$scope.$apply();
 		})
 	});
 })
