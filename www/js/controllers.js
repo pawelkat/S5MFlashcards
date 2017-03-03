@@ -165,21 +165,43 @@ angular.module('starter.controllers', [])
   $scope.remove = function(chat) {
     flashcards.remove(chat);
   };*/
-  flashcards.config().then(function(confDoc){
+  	
+  	$scope.flashcards = [];
+  	flashcards.config().then(function(confDoc){
 		console.log(confDoc);
 		$scope.categories=confDoc.settings.mainCategory;
-		flashcards.getByCategories($scope.categories).then(function(result){
+		
+		//retrieving the first page
+		flashcards.getByCategories($scope.categories, 0).then(function(result){
 			$scope.flashcards=result;
-			$scope.itemsCnt=result.length;
+			$scope.$apply();
+		})
+		//counting the total numer of items
+		flashcards.countByCategories($scope.categories).then(function(result){
+			$scope.itemsCnt=result;
 			$scope.$apply();
 		})
 	});
+
+  	//retrieving the pages with infinitescroll directive
+  	$scope.loadMore = function() {   	
+    	flashcards.getByCategories($scope.categories, $scope.flashcards.length).then(function(result){
+    		console.log("scrolled " + $scope.flashcards.length);
+			var newArr = $scope.flashcards.concat(result);
+			$scope.flashcards = newArr;
+			$scope.$broadcast('scroll.infiniteScrollComplete');
+		})      	
+  	};
+
+  	$scope.$on('$stateChangeSuccess', function() {
+    	$scope.loadMore();
+    });
 })
 
 .controller('flashcardDetailCtrl', function($scope, $stateParams, flashcards) {
     var db = flashcards.db();
     var currFlashcard;
-  	$scope.flashcard = flashcards.get($stateParams.flashcardId);
+  	//$scope.flashcard = flashcards.get($stateParams.flashcardId);
   	//commit function. Adding the next revision as a current Date()
    	$scope.commit = function() {
    		currFlashcard.flashcard.learnData={nextDate : new Date().toJSON()};
@@ -203,33 +225,36 @@ angular.module('starter.controllers', [])
   	};
 
   	$scope.categories = $scope.getCats();
-    var container = jQuery('#container2'),
-	idea = MAPJS.content(test_tree()),
-	imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
-	mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
-	container.domMapWidget(console, mapModel, false, imageInsertController);
-	jQuery('body').mapToolbarWidget(mapModel);
-	//jQuery('body').attachmentEditorWidget(mapModel);
-	$("[data-mm-action='export-image']").click(function () {
-		MAPJS.pngExport(idea).then(function (url) {
-			window.open(url, '_blank');
+
+    db.get($stateParams.flashcardId).then(function (doc) {
+    	var container = jQuery('#container2'),
+		idea = MAPJS.content(test_tree()),
+		imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
+		mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
+		container.domMapWidget(console, mapModel, false, imageInsertController);
+		jQuery('body').mapToolbarWidget(mapModel);
+		//jQuery('body').attachmentEditorWidget(mapModel);
+		$("[data-mm-action='export-image']").click(function () {
+			MAPJS.pngExport(idea).then(function (url) {
+				window.open(url, '_blank');
+			});
 		});
-	});
-   
-	jQuery('#linkEditWidget').linkEditWidget(mapModel);
-	window.mapModel = mapModel;
-	jQuery('.arrow').click(function () {
-		jQuery(this).toggleClass('active');
-	});
-	imageInsertController.addEventListener('imageInsertError', function (reason) {
-		console.log('image insert error', reason);
-	});
-    db.get($scope.flashcard.id).then(function (doc) {
+	   
+		jQuery('#linkEditWidget').linkEditWidget(mapModel);
+		window.mapModel = mapModel;
+		jQuery('.arrow').click(function () {
+			jQuery(this).toggleClass('active');
+		});
+		imageInsertController.addEventListener('imageInsertError', function (reason) {
+			console.log('image insert error', reason);
+		});
     	currFlashcard = JSON.parse(JSON.stringify(doc));
+    	$scope.flashcard = currFlashcard;
         console.log(doc);
         idea = MAPJS.content(doc.flashcard.content);
         mapModel.setIdea(idea);
         mapModel.scaleDown();
+        $scope.$apply();
     });
              //   mapModel.setIdea(idea);
 })

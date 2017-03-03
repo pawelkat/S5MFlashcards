@@ -64,10 +64,12 @@ angular.module('starter.services', [])
       });
     }, */
     //returns the next item to learn by category
-    getByCategories: function(categories){
+    getByCategories: function(categories, offset){
       return db.query('byDateAndCat/categoryItemsWithHeader', {
         startkey: [categories, ''],
         endkey: [categories,'\uffff'],
+        skip: offset,
+        limit: 15,
         include_docs: false
       }).then(function (result) { 
           return result.rows.map(
@@ -79,6 +81,19 @@ angular.module('starter.services', [])
                 };
               }
             );
+      }).catch(function (err) {
+        console.log(err);
+      });
+    },
+    countByCategories: function(categories){
+      return db.query('byDateAndCat/categoryItemsWithHeader', {
+        startkey: [categories, ''],
+        endkey: [categories,'\uffff'],
+        include_docs: false,
+        reduce: '_count',
+        group: true
+      }).then(function (result) { 
+          return result.rows.length;
       }).catch(function (err) {
         console.log(err);
       });

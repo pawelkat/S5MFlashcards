@@ -1,16 +1,22 @@
 <ion-view view-title="flashcards {{categories}} ({{itemsCnt}})">
   <ion-content>
     <ion-list>
-      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="chat in flashcards" type="item-text-wrap" href="#/tab/flashcards/{{chat.id}}">
+      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="item in flashcards" type="item-text-wrap" href="#/tab/flashcards/{{item.id}}">
  <!--        <img ng-src="{{chat.face}}"> -->
-        <h2>{{chat.name}}</h2>
-        <p>{{chat.lastText}}</p>
+        <h2>{{item.name}}</h2>
+        <p>{{item.lastText}}</p>
         <i class="icon ion-chevron-right icon-accessory"></i>
-
-        <ion-option-button class="button-assertive" ng-click="remove(chat)">
+        <ion-option-button class="button-assertive" ng-click="remove(item)">
+          Commit
+        </ion-option-button>
+        <ion-option-button class="button-assertive" ng-click="remove(item)">
           Delete
         </ion-option-button>
       </ion-item>
     </ion-list>
+    <ion-infinite-scroll
+      on-infinite="loadMore()"
+      distance="1%">
+    </ion-infinite-scroll>
   </ion-content>
 </ion-view>
