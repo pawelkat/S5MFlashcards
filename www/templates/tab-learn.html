@@ -31,23 +31,22 @@
       <div id="container"></div>
 
     </ion-content>
-    <div style="position: absolute; bottom: 0px; width: 100%; height: 100px">
-        <div>
+    <!-- <div style="position: absolute; bottom: 0px; width: 100%; height: 100px"> -->
+       
+    <ion-footer-bar style="display: block;">
+        <div style="position: absolute; bottom: 20px; width: 100%; height: 100px">
             <a class="resetView button button-icon icon ion-android-radio-button-off"></a>
             <a class="scaleUp button button-icon icon ion-android-add-circle"></a>
             <a class="scaleDown button button-icon icon ion-android-remove-circle"></a>
             <button ng-click="showInfo()" class="button button-icon icon ion-android-radio-button-off">
         </div>
-
         <div class="button-bar">
-            <button ng-click="grade(1)" class="button button-circle button-assertive icon ion-sad"><span class="badge badge-balanced">{{grades[1]}}</span></button>
-            <button ng-click="grade(2)" class="button button-circle button-assertive icon ion-sad"><span class="badge badge-balanced">{{grades[2]}}</span></button>
-            <button ng-click="grade(3)" class="button button-circle button-energized icon ion-sad"><span class="badge badge-balanced">{{grades[3]}}</span></button>
-            <button ng-click="grade(4)" class="button button-circle button-energized icon ion-happy"><span class="badge badge-balanced">{{grades[4]}}</span></button>
-            <button ng-click="grade(5)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[5]}}</span></button>
-            <button ng-click="grade(6)" class="button button-circle button-balanced icon ion-happy"><span class="badge badge-assertive">{{grades[6]}}</span></button>
+            <!--<button ng-click="grade(1)" class="button button-icon icon ion-sad" style="color:red !important;"><span class="badge badge-balanced">{{grades[1]}}</span></button> -->
+            <button ng-click="grade(2)" class="button button-icon icon ion-sad" style="color:red !important;"><span class="badge badge-balanced">{{grades[2]}}</span></button>
+            <button ng-click="grade(3)" class="button button-icon icon ion-sad" style="color:orange !important;"><span class="badge badge-balanced">{{grades[3]}}</span></button>
+            <button ng-click="grade(4)" class="button button-icon icon ion-happy" style="color:LawnGreen !important;"><span class="badge badge-balanced">{{grades[4]}}</span></button>
+            <button ng-click="grade(5)" class="button button-icon icon ion-happy" style="color:green !important;"><span class="badge badge-assertive">{{grades[5]}}</span></button>
+            <!-- <button ng-click="grade(6)" class="button button-icon icon ion-happy" style="color:green !important;"><span class="badge badge-assertive">{{grades[6]}}</span></button> -->
         </div>
-          
-    </div>
-
+    </ion-footer-bar>
 </ion-view>

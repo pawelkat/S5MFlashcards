@@ -65,19 +65,21 @@ angular.module('starter.services', [])
     }, */
     //returns the next item to learn by category
     getByCategories: function(categories, offset){
-      return db.query('byDateAndCat/categoryItemsWithHeader', {
+      return db.query('defaultViews/categoryItemsWithHeader', {
         startkey: [categories, ''],
         endkey: [categories,'\uffff'],
         skip: offset,
         limit: 15,
-        include_docs: false
+        include_docs: false,
+        reduce: false
       }).then(function (result) { 
           return result.rows.map(
               function(row){
                 return {
                   id: row.id,
                   name: row.value.title,
-                  lastText: row.value.header
+                  lastText: row.value.header,
+                  commited: row.value.commited
                 };
               }
             );
@@ -86,20 +88,21 @@ angular.module('starter.services', [])
       });
     },
     countByCategories: function(categories){
-      return db.query('byDateAndCat/categoryItemsWithHeader', {
+      return db.query('defaultViews/categoryItemsWithHeader', {
         startkey: [categories, ''],
         endkey: [categories,'\uffff'],
         include_docs: false,
-        reduce: '_count',
-        group: true
+        reduce: true,
+        //group: true,
+        group_level: 1
       }).then(function (result) { 
-          return result.rows.length;
+          return result.rows[0].value;
       }).catch(function (err) {
         console.log(err);
       });
     },
     nextToLearn: function(categories){
-      return db.query('byDateAndCat/commitedItems', {
+      return db.query('defaultViews/commitedItems', {
         startkey: [categories, ''],
         endkey: [categories,new Date().toJSON()],
         limit: 1,
@@ -121,7 +124,7 @@ angular.module('starter.services', [])
       });
     },
     numberCardsToRepeat: function(categories){
-      return db.query('byDateAndCat/commitedItems', {
+      return db.query('defaultViews/commitedItems', {
         startkey: [categories, ''],
         endkey: [categories,new Date().toJSON()],
         include_docs: false
@@ -130,6 +133,57 @@ angular.module('starter.services', [])
       }).catch(function (err) {
         console.log(err);
       });
+    },
+    //commiting to the learning process and returning the learnData proto object 
+    commitFlashcard: function(flashcardId){
+      var currFlashcard = {};
+      return db.get(flashcardId)
+      .then(function (doc) {
+        currFlashcard = doc;
+      })
+      .then(function(){
+        currFlashcard.flashcard.learnData={nextDate : new Date().toJSON()};
+        db.put(currFlashcard);
+        return currFlashcard.flashcard.learnData;
+      })
+      .catch(function (err) {
+        return false;
+      })
+    },
+    //saving the map content: the Idea, need to conserve the original learning data 
+    saveMapContent: function(flashcardId, mapContent) {
+      var currFlashcard = {};
+      return db.get(flashcardId)
+      .then(function (doc) {
+        currFlashcard = doc;
+      })
+      .then(function(){
+        currFlashcard.flashcard.content=mapContent;
+        db.put(currFlashcard);
+        return currFlashcard.flashcard;
+      })
+      .catch(function (err) {
+        return false;
+      })
+    },
+    addFlashcard: function(categories) {
+      var newFlashcard = {
+        flashcard: {
+          category:[categories],
+          content:{
+            formatVersion:"2",
+            id:"1",
+            title: "__newItem"
+          }
+        }
+      };
+      return db.post(newFlashcard)
+      then(function(response){
+        return newFlashcard;      
+      })
+      .catch(function (err) {
+        return false;
+      })
     },
     remove: function(chat) {
       flashcards.splice(flashcards.indexOf(chat), 1);
@@ -142,11 +196,19 @@ angular.module('starter.services', [])
       }
       return null;
     },
-
+    getCategories: function(){
+      return db.query('defaultViews/mainCategory', {
+        reduce: true,
+        group: true
+      }).then(function (result) {
+        console.log(result);
+        return result;
+      });
+    },
     //creating or updating local indexes
     updateIndex: function(){
       var designDoc = {};
-      var designDocName ="_design/byDateAndCat";
+      var designDocName ="_design/defaultViews";
 
       db.get(designDocName)
       .then(function (doc) {
@@ -174,14 +236,25 @@ angular.module('starter.services', [])
                 _.each(doc.flashcard.content.ideas, function (value, key){
                   header = header + value.title + "...";
                 });
-                emit([doc.flashcard.category[0], title], {title: title, header: header, commited: doc.flashcard.hasOwnProperty("learnData")});
+                var commited = false;
+                if (doc.flashcard.hasOwnProperty("learnData"))
+                  commited = doc.flashcard.learnData.hasOwnProperty("nextDate");
+                emit([doc.flashcard.category[0], title], {title: title, header: header, commited: commited});
               }
-            }.toString() //,
-            //reduce: "_count"
+            }.toString(),
+            reduce: "_count"
+          },
+          mainCategory: {
+            map: function mapFun(doc) {
+              if (doc.flashcard.hasOwnProperty("category")) {
+                emit(doc.flashcard.category[0]);
+              }
+            }.toString(),
+            reduce: "_count"
           }
         };
         db.put(designDoc).then(function (doc) {
-          console.log("view byDate updated")        
+          console.log("defaultViews updated")        
         });
       })    
     }

@@ -17,7 +17,6 @@ angular.module('starter.controllers', [])
 	    $scope.noCardsToRepeat = 0;
 
 	    $scope.$on("$ionicView.enter", function(event, data){
-
 	   		$scope.showNextToRepeat();
 		});
 	    //displaying card information
@@ -152,7 +151,7 @@ angular.module('starter.controllers', [])
 	});	
 })
 
-.controller('flashcardsCtrl', function($scope, flashcards) {
+.controller('flashcardsCtrl', function($scope, flashcards, $state) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
@@ -182,7 +181,13 @@ angular.module('starter.controllers', [])
 			$scope.$apply();
 		})
 	});
-
+  	$scope.addFlashcard = function(){
+  		flashcards.addFlashcard($scope.categories).then(function(response){
+  			console.log(response);
+  			//$location.path('/tab/flashcards/'+ response.id);
+  			$state.go('tab.flashcard-detail', {flashcardId: response.id});
+  		})
+  	};
   	//retrieving the pages with infinitescroll directive
   	$scope.loadMore = function() {   	
     	flashcards.getByCategories($scope.categories, $scope.flashcards.length).then(function(result){
@@ -196,39 +201,63 @@ angular.module('starter.controllers', [])
   	$scope.$on('$stateChangeSuccess', function() {
     	$scope.loadMore();
     });
+
+    $scope.commit = function(item) {
+    	console.log("commiting");
+    	console.log(item);
+    	flashcards.commitFlashcard(item.id).then(function(result){
+    		//updating directly, be carefull, the result could be differend as 
+    		item.commited=result.hasOwnProperty("nextDate");
+    		$scope.$apply();	
+    	})
+    };
 })
 
 .controller('flashcardDetailCtrl', function($scope, $stateParams, flashcards) {
     var db = flashcards.db();
     var currFlashcard;
-  	//$scope.flashcard = flashcards.get($stateParams.flashcardId);
-  	//commit function. Adding the next revision as a current Date()
+
+    $scope.flashcard ={};
+
    	$scope.commit = function() {
-   		currFlashcard.flashcard.learnData={nextDate : new Date().toJSON()};
-    	db.put(currFlashcard);
+   		flashcards.commitFlashcard($scope.flashcard._id).then(function(result){
+    		//updating directly, be carefull, the result could be differend as 
+    		$scope.flashcard.learnData = result;
+    		$scope.$apply();	
+    	})
+  	};
+  	$scope.isCommited = function() {
+  		var commited = false;
+        if ($scope.flashcard.hasOwnProperty("learnData"))
+          commited = $scope.flashcard.learnData.hasOwnProperty("nextDate");
+      	return commited;
   	};
 
   	$scope.getCats = function(){ 
-  		db.query('categ/aa', {
-		    reduce: true,
-		    group: true
-		  }).then(function (result) {
-		  	console.log(result);
+  		flashcards.getCategories().then(function(result){
 		  	var cats = [];
 		  	_.each(result.rows, function (value, key){
-              cats.push({desc: value.key[0][0]});
+              cats.push({desc: value.key});
             })
 		  	$scope.categories = cats;
 		  	$scope.$apply();
-		  })
-
+		  });
   	};
 
+  	$scope.addSubIdea = function(){
+  		mapModel.addSubIdea("toolbar", undefined, ".");
+  	};
+  	$scope.save = function(){
+  		var mapContent = JSON.parse(JSON.stringify(mapModel.getIdea()));
+  		console.log(mapContent);
+  		flashcards.saveMapContent($scope.flashcard._id, mapContent).then(function(result){alert("Saved")});
+  	};
   	$scope.categories = $scope.getCats();
 
     db.get($stateParams.flashcardId).then(function (doc) {
     	var container = jQuery('#container2'),
 		idea = MAPJS.content(test_tree()),
+
 		imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
 		mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
 		container.domMapWidget(console, mapModel, false, imageInsertController);
@@ -286,6 +315,7 @@ angular.module('starter.controllers', [])
 			settingsDoc = doc;
 		    console.log("settings saved");  		
 	    });
+	    $state.go($app.feed, {}, {reload: true});
 	}
 
 	$scope.reindex = function() {
@@ -349,6 +379,7 @@ angular.module('starter.controllers', [])
 	      alert("replication error");
 	    });
   	};
+
   	$scope.clearDatabase = function() {
 
 	   	var confirmPopup = $ionicPopup.confirm({
@@ -370,19 +401,14 @@ angular.module('starter.controllers', [])
  	};
 		
   	$scope.getCats = function(){ 
-  		db.query('categ/aa', {
-		    reduce: true,
-		    group: true
-		  }).then(function (result) {
-		  	console.log(result);
+  		flashcards.getCategories().then(function(result){
 		  	var cats = [];
 		  	_.each(result.rows, function (value, key){
-              cats.push({desc: value.key[0][0]});
+              cats.push({desc: value.key});
             })
 		  	$scope.categories = cats;
 		  	$scope.$apply();
-		  })
-
+		  });
   	};
   	$scope.categories = $scope.getCats();
   	

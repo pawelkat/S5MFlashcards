@@ -1,12 +1,14 @@
 <ion-view view-title="flashcards {{categories}} ({{itemsCnt}})">
   <ion-content>
     <ion-list>
-      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="item in flashcards" type="item-text-wrap" href="#/tab/flashcards/{{item.id}}">
+      <ion-item class="item-remove-animate item-avatar item-icon-left item-icon-right" ng-repeat="item in flashcards" type="item-text-wrap" href="#/tab/flashcards/{{item.id}}">
  <!--        <img ng-src="{{chat.face}}"> -->
+        <i ng-if="item.commited==true" class="icon ion-ios-checkmark"></i>
+        <i ng-if="item.commited!=true" class="icon ion-ios-circle-outline"></i>
         <h2>{{item.name}}</h2>
         <p>{{item.lastText}}</p>
         <i class="icon ion-chevron-right icon-accessory"></i>
-        <ion-option-button class="button-assertive" ng-click="remove(item)">
+        <ion-option-button class="button-assertive" ng-if="item.commited!=true" ng-click="commit(item)">
           Commit
         </ion-option-button>
         <ion-option-button class="button-assertive" ng-click="remove(item)">
@@ -19,4 +21,7 @@
       distance="1%">
     </ion-infinite-scroll>
   </ion-content>
+  <div style="position: absolute; bottom: 50px; right: 50px">
+        <button ng-click="addFlashcard()" class="button button-icon icon ion-ios-plus" style="color:red !important;">
+  </div>
 </ion-view>
