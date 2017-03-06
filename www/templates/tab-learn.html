@@ -25,20 +25,20 @@
             <!-- <div id="container" style="overflow: auto; "></div> -->
     <!-- </div> -->
    
-  <!-- </ion-content> -->
-    <ion-content>
-        <!--<p class="row">Cards to repeat: {{noCardsToRepeat}}</p> --> 
-      <div id="container"></div>
 
-    </ion-content>
-    <!-- <div style="position: absolute; bottom: 0px; width: 100%; height: 100px"> -->
-       
+        <!--<p class="row">Cards to repeat: {{noCardsToRepeat}}</p> --> 
+    <div id="container" style="height:90%;border:0px"></div>
+  
     <ion-footer-bar style="display: block;">
+        <div style="position: absolute; bottom: 130px; right: 20px">
+            <button ng-click="flipFlashcard()" class="button button-icon icon ion-ios-navigate" style="height: 20px; color:red !important; font-size: larger !important;">
+        </div>
         <div style="position: absolute; bottom: 20px; width: 100%; height: 100px">
             <a class="resetView button button-icon icon ion-android-radio-button-off"></a>
             <a class="scaleUp button button-icon icon ion-android-add-circle"></a>
             <a class="scaleDown button button-icon icon ion-android-remove-circle"></a>
-            <button ng-click="showInfo()" class="button button-icon icon ion-android-radio-button-off">
+            <button ng-click="showInfo()" class="button button-icon icon ion-ios-information-outline">
+            <button ng-click="editFlashcard()" class="button button-icon icon ion-ios-compose-outline">
         </div>
         <div class="button-bar">
             <!--<button ng-click="grade(1)" class="button button-icon icon ion-sad" style="color:red !important;"><span class="badge badge-balanced">{{grades[1]}}</span></button> -->

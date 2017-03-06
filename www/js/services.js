@@ -2,26 +2,22 @@ angular.module('starter.services', [])
 
 .factory('flashcards', function() {
   // Might use a resource here that returns a JSON array
-    var db = new PouchDB('flashcards');
-    var flashcards = [];
-    //formatting function for the items
-    getText = function(content){
-            var aa = "...";
-          //for (var i = 0; i < content.ideas.length; i++) {
-            _.each(content.ideas, function (value, key){
-              aa = aa + value.title + "...";
-            });
-            return aa;
-        };
-
+  var db = new PouchDB('flashcards');
+  var flashcards = [];
+  var settingsDoc ={}; 
   return {
     db: function(){
       return db;
     },
-    //the function returning the current initial configuration
+
     config: function(){
+      return settingsDoc;
+    },
+    //the function returning the current initial configuration
+    loadConfig: function(){
       return db.get("settingsDoc").then(function (doc) {
-        return doc;
+        settingsDoc=doc;
+        return settingsDoc;
       }).catch(function (err) {
         return null;
       });
@@ -185,16 +181,23 @@ angular.module('starter.services', [])
         return false;
       })
     },
-    remove: function(chat) {
-      flashcards.splice(flashcards.indexOf(chat), 1);
+    deleteFlashcard: function(flashcardId){
+      return db.get(flashcardId).then(function(doc) {
+        return db.remove(doc);
+      }).then(function (result) {
+        return result
+      }).catch(function (err) {
+        return err;
+      });
     },
-    get: function(chatId) {
-      for (var i = 0; i < flashcards.length; i++) {
-        if (flashcards[i].id === chatId) {
-          return flashcards[i];
-        }
-      }
-      return null;
+    getFlashcard: function(flashcardId){
+      return db.get(flashcardId)
+      .then(function (doc) {
+        return doc;
+      })
+      .catch(function (err) {
+        return err;
+      })
     },
     getCategories: function(){
       return db.query('defaultViews/mainCategory', {

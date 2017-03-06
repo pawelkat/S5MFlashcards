@@ -1,12 +1,11 @@
 angular.module('starter.controllers', [])
 
-.controller('LearnCtrl', function($scope, flashcards) {
+.controller('LearnCtrl', function($scope, flashcards, $state) {
 
 	// geting data from the db with a promise. correct way!!!
-	flashcards.config().then(function(confDoc){
+	flashcards.loadConfig().then(function(confDoc){
 		console.log(confDoc);
 		$scope.categories=confDoc.settings.mainCategory;
-
 
 		var db = flashcards.db();
 	    var currDoc = null;
@@ -97,18 +96,28 @@ angular.module('starter.controllers', [])
 		  nextDate.setDate(today.getDate() + cardLearnData.interval);
 		  cardLearnData.nextDate = nextDate.toJSON();
 		}
-
+		$scope.flipFlashcard = function() {
+			mapModel.toggleCollapse(null);
+	        mapModel.scale("toolbar", 1.0);
+		};
+		$scope.editFlashcard = function() {
+			console.log(currDoc.flashcard)
+			$state.go('tab.flashcard-detail', {flashcardId: currDoc._id}, {reload: true, notify:true});
+		};
 	  	$scope.showNextToRepeat = function() {
+	  		$scope.categories=flashcards.config().settings.mainCategory;
 	  		flashcards.nextToLearn($scope.categories).then(function (result) {
 	  			//$scope.noCardsToRepeat = result.itemsRemaining;
 	  			console.log(result);
 	  			currDoc=result.doc;
-	  			db.get(result.key).then(function (doc) {
+	  			flashcards.getFlashcard(result.key).then(function (doc) {
 	  				$scope.nextRevStr(doc);
 	        		idea = MAPJS.content(doc.flashcard.content);
 
 	        		mapModel.setIdea(idea);
-	        		mapModel.scaleDown();
+	        		
+	        		mapModel.toggleCollapse(null);
+	        		mapModel.scale("toolbar", 1.5);
 	        		$scope.$apply();
 				});
 				//calculating how many cards left to learn in category
@@ -166,10 +175,25 @@ angular.module('starter.controllers', [])
   };*/
   	
   	$scope.flashcards = [];
-  	flashcards.config().then(function(confDoc){
+
+    $scope.$on("$ionicView.enter", function(event, data){
+    	var newCategories = flashcards.config().settings.mainCategory;
+   		if( newCategories !== $scope.categories){
+   			$scope.categories = newCategories;
+   			//cleaning and refreshing the view
+   			$scope.flashcards = [];
+   			$scope.retrieveFlashcards();
+   		}
+	});
+
+    //this is loaded once the view is opened
+  	flashcards.loadConfig().then(function(confDoc){
 		console.log(confDoc);
-		$scope.categories=confDoc.settings.mainCategory;
-		
+		$scope.categories=flashcards.config().settings.mainCategory;
+		$scope.retrieveFlashcards();
+	});
+
+	$scope.retrieveFlashcards = function(){
 		//retrieving the first page
 		flashcards.getByCategories($scope.categories, 0).then(function(result){
 			$scope.flashcards=result;
@@ -180,7 +204,7 @@ angular.module('starter.controllers', [])
 			$scope.itemsCnt=result;
 			$scope.$apply();
 		})
-	});
+	};
   	$scope.addFlashcard = function(){
   		flashcards.addFlashcard($scope.categories).then(function(response){
   			console.log(response);
@@ -214,7 +238,6 @@ angular.module('starter.controllers', [])
 })
 
 .controller('flashcardDetailCtrl', function($scope, $stateParams, flashcards) {
-    var db = flashcards.db();
     var currFlashcard;
 
     $scope.flashcard ={};
@@ -253,38 +276,46 @@ angular.module('starter.controllers', [])
   		flashcards.saveMapContent($scope.flashcard._id, mapContent).then(function(result){alert("Saved")});
   	};
   	$scope.categories = $scope.getCats();
+  	$scope.renderFlashcard = function(flashcardId){
+	    flashcards.getFlashcard(flashcardId).then(function (doc) {
+	    	var container = jQuery('#container2'),
+			idea = MAPJS.content(test_tree()),
 
-    db.get($stateParams.flashcardId).then(function (doc) {
-    	var container = jQuery('#container2'),
-		idea = MAPJS.content(test_tree()),
-
-		imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
-		mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
-		container.domMapWidget(console, mapModel, false, imageInsertController);
-		jQuery('body').mapToolbarWidget(mapModel);
-		//jQuery('body').attachmentEditorWidget(mapModel);
-		$("[data-mm-action='export-image']").click(function () {
-			MAPJS.pngExport(idea).then(function (url) {
-				window.open(url, '_blank');
+			imageInsertController = new MAPJS.ImageInsertController("http://localhost:4999?u="),
+			mapModel = new MAPJS.MapModel(MAPJS.DOMRender.layoutCalculator, []);
+			container.domMapWidget(console, mapModel, false, imageInsertController);
+			jQuery('body').mapToolbarWidget(mapModel);
+			//jQuery('body').attachmentEditorWidget(mapModel);
+			$("[data-mm-action='export-image']").click(function () {
+				MAPJS.pngExport(idea).then(function (url) {
+					window.open(url, '_blank');
+				});
 			});
-		});
-	   
-		jQuery('#linkEditWidget').linkEditWidget(mapModel);
-		window.mapModel = mapModel;
-		jQuery('.arrow').click(function () {
-			jQuery(this).toggleClass('active');
-		});
-		imageInsertController.addEventListener('imageInsertError', function (reason) {
-			console.log('image insert error', reason);
-		});
-    	currFlashcard = JSON.parse(JSON.stringify(doc));
-    	$scope.flashcard = currFlashcard;
-        console.log(doc);
-        idea = MAPJS.content(doc.flashcard.content);
-        mapModel.setIdea(idea);
-        mapModel.scaleDown();
-        $scope.$apply();
-    });
+		   
+			jQuery('#linkEditWidget').linkEditWidget(mapModel);
+			window.mapModel = mapModel;
+			jQuery('.arrow').click(function () {
+				jQuery(this).toggleClass('active');
+			});
+			imageInsertController.addEventListener('imageInsertError', function (reason) {
+				console.log('image insert error', reason);
+			});
+	    	currFlashcard = JSON.parse(JSON.stringify(doc));
+	    	$scope.flashcard = currFlashcard;
+	        console.log(doc);
+	        idea = MAPJS.content(doc.flashcard.content);
+	        mapModel.setIdea(idea);
+	        mapModel.scaleDown();
+	        $scope.$apply();
+	    });
+	};
+	$scope.$on("$ionicView.enter", function(event, data){
+
+	   	$scope.renderFlashcard($stateParams.flashcardId);
+	   	//$window.location.reload();
+	});
+
+	$scope.renderFlashcard($stateParams.flashcardId)
              //   mapModel.setIdea(idea);
 })
 
@@ -311,11 +342,12 @@ angular.module('starter.controllers', [])
 
 	$scope.settingsSave = function() {
 		settingsDoc.settings = $scope.settings;
+		flashcards.config().settings = $scope.settings;
 		db.put(settingsDoc).then(function (doc) {
 			settingsDoc = doc;
 		    console.log("settings saved");  		
 	    });
-	    $state.go($app.feed, {}, {reload: true});
+	    //$state.go($app.feed, {}, {reload: true});
 	}
 
 	$scope.reindex = function() {
