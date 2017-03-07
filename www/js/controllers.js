@@ -195,7 +195,7 @@ angular.module('starter.controllers', [])
 
 	$scope.retrieveFlashcards = function(){
 		//retrieving the first page
-		flashcards.getByCategories($scope.categories, 0).then(function(result){
+		flashcards.getByCategories($scope.categories, 0, $scope.filterStr).then(function(result){
 			$scope.flashcards=result;
 			$scope.$apply();
 		})
@@ -217,13 +217,19 @@ angular.module('starter.controllers', [])
   			console.log(response);
   			if(response.ok==true){
   				$scope.flashcards.splice($scope.flashcards.indexOf(flashcard), 1);
+  				$scope.itemsCnt+=-1;
   				$scope.$apply();
   			}
   		}) 		
   	}
+
+  	$scope.filterFlashcards = function(filterStr){
+  		$scope.flashcards = [];
+   		$scope.retrieveFlashcards();
+  	};
   	//retrieving the pages with infinitescroll directive
   	$scope.loadMore = function() {   	
-    	flashcards.getByCategories($scope.categories, $scope.flashcards.length).then(function(result){
+    	flashcards.getByCategories($scope.categories, $scope.flashcards.length, $scope.filterStr).then(function(result){
     		console.log("scrolled " + $scope.flashcards.length);
 			var newArr = $scope.flashcards.concat(result);
 			$scope.flashcards = newArr;

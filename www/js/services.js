@@ -60,10 +60,10 @@ angular.module('starter.services', [])
       });
     }, */
     //returns the next item to learn by category
-    getByCategories: function(categories, offset){
+    getByCategories: function(categories, offset, filterStr){
       return db.query('defaultViews/categoryItemsWithHeader', {
-        startkey: [categories, ''],
-        endkey: [categories,'\uffff'],
+        startkey: [categories, filterStr],
+        endkey: [categories, filterStr + '\uffff'],
         skip: offset,
         limit: 15,
         include_docs: false,

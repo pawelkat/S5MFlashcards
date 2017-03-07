@@ -1,4 +1,5 @@
 <ion-view view-title="flashcards {{categories}} ({{itemsCnt}})">
+
   <ion-content>
     <ion-list>
       <ion-item class="item-remove-animate item-avatar item-icon-left item-icon-right" ng-repeat="item in flashcards" type="item-text-wrap" href="#/tab/flashcards/{{item.id}}">
@@ -24,4 +25,8 @@
   <div style="position: absolute; bottom: 50px; right: 50px">
         <button ng-click="addFlashcard()" class="button button-icon icon ion-ios-plus" style="color:red !important; font-size: larger !important;">
   </div>
+  <ion-footer-bar>
+    <i class="button-icon icon ion-android-search"></i>
+    <input type="search" placeholder="Search" ng-model="filterStr" ng-change="filterFlashcards(filterStr)">   
+  </ion-footer-bar>
 </ion-view>
