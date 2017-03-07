@@ -212,6 +212,15 @@ angular.module('starter.controllers', [])
   			$state.go('tab.flashcard-detail', {flashcardId: response.id});
   		})
   	};
+  	$scope.deleteFlashcard = function(flashcard){
+  		flashcards.deleteFlashcard(flashcard.id).then(function(response){
+  			console.log(response);
+  			if(response.ok==true){
+  				$scope.flashcards.splice($scope.flashcards.indexOf(flashcard), 1);
+  				$scope.$apply();
+  			}
+  		}) 		
+  	}
   	//retrieving the pages with infinitescroll directive
   	$scope.loadMore = function() {   	
     	flashcards.getByCategories($scope.categories, $scope.flashcards.length).then(function(result){
@@ -311,7 +320,7 @@ angular.module('starter.controllers', [])
 	};
 	$scope.$on("$ionicView.enter", function(event, data){
 
-	   	$scope.renderFlashcard($stateParams.flashcardId);
+	   	//$scope.renderFlashcard($stateParams.flashcardId);
 	   	//$window.location.reload();
 	});
 
