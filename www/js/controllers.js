@@ -230,7 +230,9 @@ angular.module('starter.controllers', [])
   	};
 
   	$scope.clearFilter = function(){
+  		$scope.flashcards = [];
   		$scope.filterStr = '';
+  		$scope.retrieveFlashcards();
   	}
   	//retrieving the pages with infinitescroll directive
   	$scope.loadMore = function() {   	
@@ -441,7 +443,8 @@ angular.module('starter.controllers', [])
 			$scope.reindex();
 		});
 	};
-  	$scope.getCats = function(){ 
+  	$scope.getCats = function(){
+  		$scope.categories = []; 
   		flashcards.isDbEmpty().then(function (isEmpty) {
   			if(!isEmpty){
 		  		$ionicLoading.show({
@@ -451,12 +454,16 @@ angular.module('starter.controllers', [])
 		  		flashcards.getCategories().then(function(result){
 				  	var cats = [];
 				  	_.each(result.rows, function (value, key){
-		              cats.push({desc: value.key, categoryCount: value.value});
+				  		flashcards.numberCardsToRepeat(value.key).then(function(toLearnResult){
+				  			console.log(toLearnResult);
+				  			$scope.categories.push({desc: value.key, categoryCount: value.value, toLearnCount: toLearnResult});
+				  			$scope.$apply();
+				  		});
+		              	//$scope.categories.push({desc: value.key, categoryCount: value.value});
 		            })
-				  	$scope.categories = cats;
 				  	$scope.isDbEmpty = false;
 				  	$ionicLoading.hide()
-				  	$scope.$apply();
+				  	
 				});
 		  	}else{
 		  		$scope.isDbEmpty = true;
@@ -464,6 +471,6 @@ angular.module('starter.controllers', [])
 		  	}
   		});
   	};
-  	$scope.categories = $scope.getCats();
+  	$scope.getCats();
   	
 });

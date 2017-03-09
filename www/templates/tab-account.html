@@ -9,7 +9,7 @@
         <a ng-if="isDbEmpty" ng-click="loadSampleData()" class="redo button button-icon icon ion-forward">Load sample, funny flashcards </a><br/>
 	    <ion-list>
 	      <ion-item class="item-remove-animate item-icon-left item-icon-right" ng-click="selectCategory(cat)" ng-repeat="cat in categories" type="item-text-wrap">
-	        <h2>{{cat.desc}}<span class="badge badge-dark">{{cat.categoryCount}}</span></h2>
+	        <h2>{{cat.desc}} <span class="badge badge-assertive" style = "right: 100px">{{cat.toLearnCount}}</span><span class="badge badge-dark">{{cat.categoryCount}}</span></h2>
 	        <i ng-if="cat.desc===settings.mainCategory" class="icon ion-ios-checkmark"></i>
 	        <i class="icon ion-chevron-right icon-accessory"></i>
 	        <ion-option-button class="button-assertive" ng-click="commit(cat)">
@@ -21,8 +21,11 @@
 	      </ion-item>
 	    </ion-list>
   	</ion-content>
-	<ion-footer-bar>
-		
+  	
+	<ion-footer-bar>		
 	   	<button ng-click="settingsSave()" class="button button-circle button-assertive">Save settings</button>
+	   	<div style="position: absolute; right: 20px">
+	        <button ng-click="getCats()" class="button button-icon icon ion-ios-refresh" style="color:red !important; font-size: larger !important;">
+	  	</div>
 	</ion-footer-bar>
 </ion-view>
