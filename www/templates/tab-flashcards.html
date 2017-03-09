@@ -27,6 +27,7 @@
   </div>
   <ion-footer-bar>
     <i class="button-icon icon ion-android-search"></i>
-    <input type="search" placeholder="Search" ng-model="filterStr" ng-change="filterFlashcards(filterStr)">   
+    <input type="search" placeholder="Search" ng-model="filterStr" ng-change="filterFlashcards(filterStr)" style="width: 100%">  
+    <button ng-if="filterStr" class="button button-icon icon ion-close" ng-click="clearFilter()"></button> 
   </ion-footer-bar>
 </ion-view>

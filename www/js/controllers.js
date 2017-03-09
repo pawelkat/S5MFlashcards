@@ -175,7 +175,7 @@ angular.module('starter.controllers', [])
   };*/
   	
   	$scope.flashcards = [];
-
+  	$scope.filterStr = '';
     $scope.$on("$ionicView.enter", function(event, data){
     	var newCategories = flashcards.config().settings.mainCategory;
    		if( newCategories !== $scope.categories){
@@ -195,7 +195,7 @@ angular.module('starter.controllers', [])
 
 	$scope.retrieveFlashcards = function(){
 		//retrieving the first page
-		flashcards.getByCategories($scope.categories, 0, $scope.filterStr).then(function(result){
+		flashcards.getByCategories($scope.categories, 0, $scope.filterStr.toLowerCase()).then(function(result){
 			$scope.flashcards=result;
 			$scope.$apply();
 		})
@@ -212,6 +212,7 @@ angular.module('starter.controllers', [])
   			$state.go('tab.flashcard-detail', {flashcardId: response.id});
   		})
   	};
+
   	$scope.deleteFlashcard = function(flashcard){
   		flashcards.deleteFlashcard(flashcard.id).then(function(response){
   			console.log(response);
@@ -227,9 +228,13 @@ angular.module('starter.controllers', [])
   		$scope.flashcards = [];
    		$scope.retrieveFlashcards();
   	};
+
+  	$scope.clearFilter = function(){
+  		$scope.filterStr = '';
+  	}
   	//retrieving the pages with infinitescroll directive
   	$scope.loadMore = function() {   	
-    	flashcards.getByCategories($scope.categories, $scope.flashcards.length, $scope.filterStr).then(function(result){
+    	flashcards.getByCategories($scope.categories, $scope.flashcards.length, $scope.filterStr.toLowerCase()).then(function(result){
     		console.log("scrolled " + $scope.flashcards.length);
 			var newArr = $scope.flashcards.concat(result);
 			$scope.flashcards = newArr;
@@ -252,7 +257,7 @@ angular.module('starter.controllers', [])
     };
 })
 
-.controller('flashcardDetailCtrl', function($scope, $stateParams, flashcards) {
+.controller('flashcardDetailCtrl', function($scope, $stateParams,  $ionicLoading, flashcards) {
     var currFlashcard;
 
     $scope.flashcard ={};
@@ -288,7 +293,12 @@ angular.module('starter.controllers', [])
   	$scope.save = function(){
   		var mapContent = JSON.parse(JSON.stringify(mapModel.getIdea()));
   		console.log(mapContent);
-  		flashcards.saveMapContent($scope.flashcard._id, mapContent).then(function(result){alert("Saved")});
+  		flashcards.saveMapContent($scope.flashcard._id, mapContent).then(function(result){
+  			$ionicLoading.show({
+			      template: 'saved',
+			      duration: 500
+			});
+  		});
   	};
   	$scope.categories = $scope.getCats();
   	$scope.renderFlashcard = function(flashcardId){
@@ -334,79 +344,56 @@ angular.module('starter.controllers', [])
              //   mapModel.setIdea(idea);
 })
 
-.controller('AccountCtrl', function($scope, $ionicPopup, flashcards) {
+.controller('AccountCtrl', function($scope, $ionicPopup, $ionicLoading, flashcards) {
 	//default settings
+
+	//TODO: all references to db should be in services:
 	$scope.settings = {
 		remoteDB: "http://192.168.16.195:5984/flashcards"
 	}
+	$scope.categories = [];
+	$scope.isDbEmpty = false;
 
 	var db = flashcards.db();
-	var settingsDoc;
+	var settingsDoc = {
+			_id: "settingsDoc",
+			settings: {}
+		};
 	//Initializing settings from DB
 	db.get("settingsDoc").then(function (doc) {
 		settingsDoc = doc;
     	$scope.settings = doc.settings;
     	$scope.$apply();
     }).catch(function (err) {
-		settingsDoc = {
-			_id: "settingsDoc",
-			settings: $scope.settings
-		}
-      	$scope.settingsSave();
+		settingsDoc.settings= $scope.settings
+      	//$scope.settingsSave();
 	});
 
+    $scope.selectCategory = function(cat){
+    	$scope.settings.mainCategory=cat.desc; 
+    };
+
 	$scope.settingsSave = function() {
+		$ionicLoading.show({
+			      template: 'saving ...',
+			      duration: 3000
+			    });
 		settingsDoc.settings = $scope.settings;
 		flashcards.config().settings = $scope.settings;
 		db.put(settingsDoc).then(function (doc) {
-			settingsDoc = doc;
-		    console.log("settings saved");  		
+			settingsDoc._rev = doc.rev;
+		    $ionicLoading.show({
+			      template: 'saved',
+			      duration: 500
+			});  		
 	    });
 	    //$state.go($app.feed, {}, {reload: true});
 	}
 
 	$scope.reindex = function() {
-		flashcards.updateIndex();
-	/*	var ddoc = {
-		  _id: '_design/byDateAndCat',
-		  views: {
-		    byDateIndex: {
-		      map: function mapFun(doc) {
-		        if (doc.flashcard.learnData) {
-		          emit(doc.flashcard.learnData.nextDate, doc.flashcard.category);
-		        }
-		      }.toString()
-		    }
-		  }
-		}
-
-		// save the design doc
-		db.put(ddoc).then(function (doc) {
-		    console.out("view byDate updated")    		
-	    });
-
-	    ddoc = {
-	        _id: '_design/categ',
-	        views: {
-		          "aa": { 
-		            map: function (doc) { 
-		              if(doc.flashcard.hasOwnProperty("category")){emit([doc.flashcard.category])}; }.toString(), 
-		            reduce: "_count"
-		          }
-	        }
-	    };
-    
-
-		db.put(ddoc).catch(function (err) {
-		  if (err.status !== 409) { // 409 is conflict
-		    throw err;
-		  }
-		}).then(function () {
-		  return db.query('categ/aa', {
-		    reduce: true,
-		    group: true
-		  }).then(function (result) {console.log(result);})
-		});*/
+		flashcards.updateIndex().then(function(){
+			$scope.getCats();
+		});
 	}
 
 	$scope.replicateFrom = function() {
@@ -414,7 +401,7 @@ angular.module('starter.controllers', [])
 	    db.replicate.from(remoteDB).on('complete', function () {
 	    	alert("replication complete");
 	    }).on('error', function (err) {
-	      alert("replication error");
+	      alert("replication error: " + err);
 	    });
   	};
 
@@ -423,39 +410,59 @@ angular.module('starter.controllers', [])
 	    db.replicate.to(remoteDB).on('complete', function () {
 	    	alert("replication complete");
 	    }).on('error', function (err) {
-	      alert("replication error");
+	      alert("replication error: " + err);
 	    });
   	};
 
   	$scope.clearDatabase = function() {
 
 	   	var confirmPopup = $ionicPopup.confirm({
-	     	title: 'Consume Ice Cream',
-	     	template: 'Are you sure you want to eat this ice cream?'
+	     	title: 'Delete data?',
+	     	template: 'Are you sure you want to delete all your flashcards?'
 	   	});
 
    		confirmPopup.then(function(res) {
 	     	if(res) {
 	       		db.destroy().then(function (response) {
-			  // success
-			}).catch(function (err) {
-			  console.log(err);
-			});
+			  		console.log(response);
+			  		$scope.categories =[];
+			  		$scope.$apply();
+				}).catch(function (err) {
+				  console.log(err);
+				});
      		} else {
        			console.log('You are not sure');
      		}
   		});
  	};
-		
+
+	$scope.loadSampleData = function() {
+		flashcards.loadSampleData().then(function(){
+			$scope.reindex();
+		});
+	};
   	$scope.getCats = function(){ 
-  		flashcards.getCategories().then(function(result){
-		  	var cats = [];
-		  	_.each(result.rows, function (value, key){
-              cats.push({desc: value.key});
-            })
-		  	$scope.categories = cats;
-		  	$scope.$apply();
-		  });
+  		flashcards.isDbEmpty().then(function (isEmpty) {
+  			if(!isEmpty){
+		  		$ionicLoading.show({
+			      template: 'Loading statistics ...',
+			      duration: 20000
+			    })
+		  		flashcards.getCategories().then(function(result){
+				  	var cats = [];
+				  	_.each(result.rows, function (value, key){
+		              cats.push({desc: value.key, categoryCount: value.value});
+		            })
+				  	$scope.categories = cats;
+				  	$scope.isDbEmpty = false;
+				  	$ionicLoading.hide()
+				  	$scope.$apply();
+				});
+		  	}else{
+		  		$scope.isDbEmpty = true;
+		  		$scope.$apply();
+		  	}
+  		});
   	};
   	$scope.categories = $scope.getCats();
   	

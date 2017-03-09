@@ -1,20 +1,22 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version='1.0' encoding='utf-8'?>
 <widget id="com.ionicframework.myapp138346" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>MapMemo</name>
-  <description>
+    <name>MapMemo</name>
+    <description>
         Spaced repetition software with mind-map user interface. 
     </description>
-  <author email="pawelkat@gmail.com" href="https://github.com/pawelkat/S5MFlashcards">
+    <author email="pawelkat@gmail.com" href="https://github.com/pawelkat/S5MFlashcards">
       pawelkat
-    </author>
-  <content src="index.html"/>
-  <access origin="*"/>
-  <preference name="webviewbounce" value="false"/>
-  <preference name="UIWebViewBounce" value="false"/>
-  <preference name="DisallowOverscroll" value="true"/>
-  <preference name="android-minSdkVersion" value="16"/>
-  <preference name="BackupWebStorage" value="none"/>
-  <feature name="StatusBar">
-    <param name="ios-package" value="CDVStatusBar" onload="true"/>
-  </feature>
+  </author>
+    <icon src="res/MapMemo.png" />
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="webviewbounce" value="false" />
+    <preference name="UIWebViewBounce" value="false" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="android-minSdkVersion" value="16" />
+    <preference name="BackupWebStorage" value="none" />
+    <feature name="StatusBar">
+        <param name="ios-package" onload="true" value="CDVStatusBar" />
+    </feature>
+    <plugin name="cordova-plugin-crop" spec="~0.3.1" />
 </widget>
